@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mon carnet des mots</title>
+<style>
+:root{font-family:system-ui,-apple-system,Segoe UI,sans-serif;color:#243047;background:#f7f4ed}*{box-sizing:border-box}body{margin:0}button,input,textarea{font:inherit}button{cursor:pointer;border:0;border-radius:12px;padding:.7rem 1rem;background:#e6eaf7;color:#243047}button:hover{filter:brightness(.96)}button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid #bf6d61;outline-offset:2px}.primary{background:#364c96;color:white}.wrap{max-width:1080px;margin:auto;padding:20px}.hero{background:#283a76;color:white;border-radius:24px;padding:28px 32px}.hero h1{font:700 clamp(2rem,5vw,3.5rem) Georgia,serif;margin:0}.hero p{max-width:600px;line-height:1.5;color:#e4e9fc}.hero .meta{font-size:.9rem;color:#cfdaff}.nav{display:flex;flex-wrap:wrap;gap:8px;margin:20px 0}.nav button[aria-selected=true]{background:#364c96;color:white}.panel[hidden]{display:none}.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:18px 0}.toolbar input{flex:1;min-width:180px}.field,input,textarea{border:1px solid #cbd0df;border-radius:10px;padding:.7rem;background:white;color:#243047}input,textarea{width:100%}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(285px,1fr));gap:12px}.entry,.box{background:white;border:1px solid #e4e2df;border-radius:18px;padding:19px;box-shadow:0 3px 12px #23304c0a}.entry h3{font:700 1.4rem Georgia,serif;margin:0 0 8px;color:#293c81}.entry p{line-height:1.45;margin:8px 0}.entry .example{color:#5b6172;font-style:italic}.entry .tag{font-size:.77rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#986858}.entry .actions{display:flex;gap:8px;margin-top:13px}.muted{color:#626b7a}.section-title{font:700 1.65rem Georgia,serif;margin:24px 0 8px}.study{max-width:660px;margin:auto}.flip{display:block;width:100%;min-height:190px;background:#fff;border:2px solid #d6dced;border-radius:20px;padding:25px;text-align:left;font:700 clamp(1.7rem,4vw,2.8rem) Georgia,serif;color:#293c81}.flip small{display:block;font:400 .9rem system-ui;margin-top:20px;color:#697186}.answer{min-height:100px;padding:16px 3px;line-height:1.5}.answer strong{color:#293c81}.stats{font-size:.9rem;color:#5b6172}.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.form-grid label{font-weight:650}.form-grid label>*{margin-top:6px}.wide{grid-column:1/-1}.quiz-option{display:block;width:100%;margin:8px 0;text-align:left;background:#f3f5fa}.quiz-option.correct{background:#d7eedb}.quiz-option.wrong{background:#f8dcd8}.note{background:#fff1d8;border-left:4px solid #e7a33a;padding:12px;border-radius:6px;margin:16px 0}footer{margin:28px 0;color:#697186;font-size:.85rem}#toast{min-height:1.4em;color:#345b44}@media(max-width:620px){.form-grid{grid-template-columns:1fr}.hero{padding:24px}.wrap{padding:12px}.grid{grid-template-columns:1fr}}
+</style>
+<style>
+.sync-panel{max-width:1000px;margin:14px auto;background:#fff;border:1px solid #d9e3d8;border-radius:16px;padding:16px;color:#243047}.sync-panel input{padding:10px;border:1px solid #cbd5e1;border-radius:8px;max-width:100%;width:240px;margin:5px}.sync-panel button{padding:10px 14px;border-radius:8px;margin:4px;cursor:pointer}.sync-panel .hint{font-size:.9rem;color:#546276}.sync-panel #sync-status{font-weight:600}
+</style></head>
+<body><div class="wrap">
+<header class="hero"><div class="meta">UNE PETITE DOSE DE VOCABULAIRE CHAQUE JOUR ✦</div><h1>Mon carnet des mots</h1><p>Des définitions claires, des phrases à réutiliser et quelques minutes de jeu pour que les mots deviennent les tiens.</p><div id="count" class="meta"></div></header>
+<section class="sync-panel" aria-label="Synchronisation de mon carnet"><h2>☁️ Mon carnet synchronisé</h2><p id="sync-status" role="status">Connexion à Supabase…</p><div id="sync-login"><input id="sync-email" type="email" placeholder="Mon adresse e-mail" autocomplete="email"><input id="sync-password" type="password" placeholder="Mon mot de passe" autocomplete="current-password"><div><button id="sync-signin" type="button">Se connecter</button><button id="sync-signup" type="button">Créer mon accès</button></div><p class="hint">Si tu crées ton accès, vérifie ton e-mail avant de te connecter. Tes mots ne seront synchronisés qu'après connexion.</p></div><div id="sync-logged" hidden><button id="sync-refresh" type="button">↻ Actualiser mes mots</button><button id="sync-logout" type="button">Se déconnecter</button><p class="hint">Les mots ajoutés sont synchronisés. Les favoris restent propres à chaque appareil. Conserve une sauvegarde JSON de tes mots.</p></div></section><nav class="nav" aria-label="Rubriques"><button data-tab="today" aria-selected="true">✨ Mes 5 mots</button><button data-tab="words" aria-selected="false">📚 Tous les mots</button><button data-tab="quiz" aria-selected="false">🎯 Quiz</button><button data-tab="add" aria-selected="false">✍️ Ajouter un mot</button></nav>
+<main>
+<section id="today" class="panel"><h2 class="section-title">Cinq mots pour aujourd’hui</h2><p class="muted">Lis le mot, cherche son sens, puis retourne la carte. Les cinq mots changent chaque jour.</p><div class="study"><div class="stats" id="study-progress"></div><button class="flip" id="flip" aria-label="Révéler la définition"></button><div id="study-answer" class="answer" aria-live="polite"></div><div class="row"><button id="prev">← Précédent</button><button id="next" class="primary">Suivant →</button><button id="random">Autres mots</button></div></div></section>
+<section id="words" class="panel" hidden><h2 class="section-title">Ma collection</h2><div class="toolbar"><input id="search" type="search" aria-label="Chercher un mot ou une définition" placeholder="Chercher un mot, une idée…"><button id="only-fav" aria-pressed="false">☆ Mes favoris</button><button id="sort">A → Z</button></div><p class="stats" id="results"></p><div id="entries" class="grid"></div></section>
+<section id="quiz" class="panel" hidden><h2 class="section-title">Le sens caché</h2><p class="muted">Choisis la définition du mot proposé. Une nouvelle question après chaque réponse.</p><div class="box study"><div class="stats" id="score"></div><h3 id="quiz-word" class="section-title"></h3><div id="quiz-choices"></div><p id="quiz-feedback" aria-live="polite"></p><button id="quiz-next" class="primary" hidden>Question suivante →</button></div></section>
+<section id="add" class="panel" hidden><h2 class="section-title">Un nouveau mot à garder ?</h2><p class="muted">Ajoute sa définition avec tes mots et une phrase que tu pourrais vraiment dire.</p><form id="add-form" class="box form-grid"><label>Mot ou expression<input id="new-word" required maxlength="80" placeholder="Ex. perspicace"></label><label>Sens en une phrase<input id="new-definition" required maxlength="240" placeholder="Qui comprend vite et avec finesse"></label><label class="wide">Mon exemple<textarea id="new-example" required maxlength="400" rows="2" placeholder="Elle a posé une question perspicace pendant la réunion."></textarea></label><div class="wide"><button class="primary" type="submit">Ajouter à ma collection</button></div></form><h3 class="section-title">Garder une copie</h3><p class="muted">Tes ajouts et favoris sont mémorisés dans ce navigateur. Exporte une copie pour les conserver ailleurs ; l’import fusionne tes mots avec ceux de ce carnet.</p><div class="row"><button id="export">⬇ Exporter mes données</button><label class="field">⬆ Importer une sauvegarde <input id="import" type="file" accept="application/json,.json" style="margin-top:5px"></label></div><p id="toast" role="status"></p></section>
+</main><footer>Les phrases d’exemple sont originales et pensées pour l’usage quotidien. Certaines formes peu usuelles ou ambiguës sont signalées dans leur fiche.</footer></div>
+<script>
+const raw=`Se récuser|Se retirer d’une décision ou d’un jugement parce qu’on estime ne pas pouvoir être impartial.|Je connais personnellement la candidate : je préfère me récuser.|Se dit notamment d’un juge ou d’un membre de jury ; pour refuser une mission ordinaire, dis plutôt « décliner ».
+Vitupération|Blâme violent, propos indignés contre quelqu’un ou quelque chose.|Sa vitupération contre le nouveau règlement a surpris toute l’équipe.
+Sagace|Qui comprend rapidement et avec finesse ; perspicace.|Elle a fait une remarque sagace sur notre organisation.
+S’ingénier à|Employer toute son habileté, souvent avec insistance, pour parvenir à quelque chose.|Tu t’ingénies à trouver une solution pour tout le monde.
+Résipiscence|Reconnaissance de ses torts, accompagnée d’un changement d’attitude.|Après la dispute, il a enfin fait preuve de résipiscence.
+Pusillanime|Qui manque de courage ou de fermeté.|Il a été trop pusillanime pour défendre son idée en réunion.
+Pugnace|Combatif, tenace dans la défense d’une idée ou d’un objectif.|Elle est pugnace quand il s’agit de protéger les jeunes.
+Primesautier|Spontané, vif et plein de naturel.|J’aime son esprit primesautier et ses réponses imprévues.
+Polymathie|Savoir étendu dans de nombreux domaines.|Sa polymathie lui permet de relier la psychologie, l’histoire et l’art.
+Oblatif|Porté à donner de soi et à se dévouer aux autres.|Son attitude oblative l’amène parfois à s’oublier.
+Néophyte|Personne qui débute dans une activité ou vient d’adhérer à une religion ou une doctrine.|Je suis néophyte en jardinage, mais j’apprends vite.
+Neurasthénie|Terme ancien désignant un état de fatigue nerveuse avec abattement.|Après cette période éprouvante, il se disait en pleine neurasthénie.|Terme vieilli, à éviter comme diagnostic médical courant.
+Magnanime|Généreux envers quelqu’un qu’on pourrait blâmer ou punir.|Elle a été magnanime et lui a laissé une seconde chance.
+Irascible|Qui se met facilement en colère.|Quand il dort mal, il devient irascible.
+Inique|Profondément injuste, contraire à l’équité.|Cette décision me paraît inique pour les salariés concernés.
+Indolent|Qui évite l’effort, agit avec mollesse ou nonchalance.|Il est resté indolent alors que toute l’équipe s’activait.
+Indigence|Très grande pauvreté ; aussi, manque criant de qualité ou d’idées.|L’indigence des moyens complique l’accompagnement.
+Incoercible|Qu’on ne peut contenir ou réprimer.|Un rire incoercible nous a pris au milieu de la réunion.
+Hédonisme|Attitude qui accorde une place centrale à la recherche du plaisir.|Ses vacances au bord du lac ont un petit air d’hédonisme.
+Évanescent|Qui s’estompe et disparaît progressivement.|Le parfum du café était déjà évanescent.
+Euphonique|Agréable et harmonieux à entendre.|J’ai choisi cette tournure parce qu’elle est plus euphonique.
+Émacié|Très amaigri, avec les traits creusés.|Il avait le visage émacié après une longue maladie.
+Éclectisme|Goût ou choix de choses très diverses.|Son éclectisme musical va du jazz à l’opéra.
+Alexithymie|Difficulté à identifier et à exprimer ses émotions.|L’alexithymie peut rendre difficile la mise en mots d’un ressenti.|Terme clinique : ne pas l’attribuer à quelqu’un sur une simple impression.
+Abstrus|Très difficile à comprendre, obscur.|Ce passage du cours me paraît abstrus : je vais le relire.|« Abstrons » n’est pas la forme recherchée.
+Abnégation|Capacité à renoncer à ses intérêts pour se consacrer à autrui ou à une cause.|Elle a fait preuve d’abnégation pendant cette crise.
+Abjection|Caractère de ce qui est moralement ignoble ; acte vil.|L’abjection de ses propos a choqué l’assemblée.
+Déliquescence|Dégradation progressive d’une organisation, d’une situation ou d’une autorité.|La déliquescence du service se voit dans les retards accumulés.
+Patibulaire|Qui a un aspect inquiétant ou menaçant.|Dans le roman, un personnage patibulaire attend devant la porte.
+Panégyrique|Discours ou texte qui fait un éloge appuyé.|Son discours d’adieu ressemblait à un panégyrique du directeur.
+Déférent|Qui manifeste du respect et des égards.|Il a répondu d’un ton déférent à la présidente du jury.
+Fétide|Qui dégage une odeur très désagréable.|Une odeur fétide venait de la poubelle.
+Pérégrination|Long parcours, souvent fait de déplacements successifs et de détours.|Nos pérégrinations en Italie nous ont menées de Vérone à Venise.
+Perfide|Qui trahit ou agit de façon sournoise sous des dehors trompeurs.|Son sourire cachait une remarque perfide.
+Perfidie|Acte ou parole de trahison sournoise.|Il est prêt à toutes les perfidies pour gagner.
+Galvaniser|Communiquer de l’enthousiasme et de l’énergie à un groupe.|Son discours a galvanisé l’équipe avant le projet.
+Misanthrope|Qui éprouve de l’aversion pour la société des autres humains.|Ce personnage misanthrope préfère vivre seul.
+Parcimonieux|Qui dépense ou donne avec une grande retenue ; qui utilise peu.|Elle a été parcimonieuse dans ses compliments.
+Dichotomie|Division en deux parties nettement distinctes ; opposition entre deux aspects.|Il y a une dichotomie entre ce qui est annoncé et ce qui est fait.
+Obséquiosité|Politesse excessive et servile pour plaire.|Son obséquiosité devant la direction met mal à l’aise.
+Délétère|Nuisible, qui exerce une influence néfaste.|Cette ambiance délétère fatigue toute l’équipe.
+Dilection|Affection ou préférence particulière.|Elle a une dilection pour les romans italiens.|Mot littéraire : « prédilection » est plus courant.
+Asthénie|État de faiblesse ou de fatigue persistante.|Je ressens une asthénie inhabituelle depuis quelques jours.|Si cette fatigue persiste, le mot ne remplace pas un avis médical.
+Méphitique|Qui dégage une odeur mauvaise ou des émanations malsaines.|Des effluves méphitiques s’échappaient de la cave.
+Incurie|Négligence grave et durable dans la gestion ou l’entretien.|L’incurie des responsables a aggravé la situation.
+Hétéroclite|Composé d’éléments disparates qui vont mal ensemble.|Cette étagère rassemble des objets hétéroclites.
+Éloquence phraseuse|Manière de parler avec de grands mots et peu de contenu.|Sa présentation relevait d’une éloquence phraseuse.
+Servile|Excessivement soumis ; dépourvu d’indépendance.|Il a fait une copie servile du premier rapport.
+Componction|Attitude grave et recueillie, parfois affectée.|Il a présenté ses excuses avec une componction un peu théâtrale.
+Démagogue|Qui cherche à gagner l’adhésion du public en flattant ses émotions ou ses préjugés.|Sa promesse facile me paraît démagogue.
+Prosaïque|Très ordinaire, sans poésie ; terre à terre.|Après ce beau voyage, le retour aux factures est prosaïque.
+Placide|Calme, peu troublé par ce qui arrive.|Même dans l’urgence, elle reste placide.
+Prescience|Connaissance anticipée et intuitive de ce qui va arriver.|On dirait qu’elle avait la prescience de ce changement.
+Toponyme|Nom propre désignant un lieu.|« Saint-Avold » est un toponyme.
+Embonpoint|Corpulence légèrement ronde, souvent dite avec délicatesse.|Le portrait montre un homme d’un certain embonpoint.
+Ondoyant|Qui forme des courbes souples ou semble onduler ; changeant au figuré.|Les reflets ondoyants du lac étaient magnifiques.
+Épigraphe|Courte citation placée au début d’un livre ou d’un chapitre ; inscription gravée.|Elle a choisi une épigraphe pour ouvrir son mémoire.
+Pérégriner|Voyager ou aller d’un lieu à l’autre, souvent en faisant des détours.|Nous avons pérégriné dans les ruelles de Vérone.
+Distendu|Étiré ou relâché au-delà de sa tension normale.|Après le repas, j’avais le ventre distendu.
+Interstice|Petit espace entre deux éléments ou deux moments.|La lumière passe par un interstice sous la porte.
+Rasséréner|Rendre plus serein, apaiser ; se rasséréner : retrouver son calme.|Cette conversation m’a rassérénée.|Graphie corrigée : « rassénérer ».
+Iconoclaste|Qui bouscule les idées, les traditions ou les images établies.|Sa proposition iconoclaste a relancé le débat.
+Propension|Tendance naturelle à agir ou à réagir d’une certaine façon.|J’ai une propension à vouloir tout organiser avant de partir.
+Béotien / béotienne|Personne peu connaisseuse d’un domaine ; novice.|Je suis béotienne en astronomie, explique-moi simplement.
+Avili / avilie|Rendu moralement méprisable ou humilié, dégradé.|Elle s’est sentie avilie par ces remarques répétées.
+Diatribe|Discours ou texte de critique violente et prolongée.|Il a lancé une diatribe contre les nouvelles règles.
+Inaltérable|Qui ne se modifie pas ou ne se détériore pas.|Elle garde un enthousiasme inaltérable pour son travail.
+Immérité / imméritée|Qui n’a pas été mérité.|Ce reproche était immérité.
+Apathique|Qui manque d’énergie, de réaction ou d’intérêt.|Après une nuit blanche, il était apathique.
+Pernicieux / pernicieuse|Qui nuit progressivement, parfois de façon peu visible.|Cette rumeur a une influence pernicieuse sur l’équipe.
+Pétulant / pétulante|Vif, enjoué et un peu turbulent.|Son humeur pétulante a animé le dîner.
+Inoculer|Introduire un agent infectieux ou une substance dans un organisme ; transmettre une idée au figuré.|Son enthousiasme a inoculé à l’équipe l’envie d’essayer.|Au figuré, souvent employé pour une idée ou un sentiment qui se propage.
+Délation|Dénonciation faite dans une intention malveillante ou intéressée.|La délation anonyme a abîmé la confiance dans le groupe.
+Logorrhée|Flux de paroles abondant et difficile à arrêter.|Sa logorrhée ne laissait aucune place aux questions.|Graphie corrigée : « loghorée ».
+Anthropique|Causé par l’activité humaine ou lié à elle.|Cette pollution a une origine anthropique.
+Affable|Aimable et accueillant dans sa manière de parler.|Le réceptionniste était très affable.
+Affubler|Habiller quelqu’un de façon ridicule ; attribuer un nom ou un rôle peu flatteur.|On l’a affublé d’un surnom qu’il déteste.
+Impétueux / impétueuse|Qui agit avec fougue et rapidité, parfois sans réfléchir.|Son élan impétueux l’a poussé à répondre aussitôt.
+Pérorer|Parler longuement avec assurance et prétention.|Il a péroré pendant vingt minutes sans répondre à la question.
+Assentiment|Accord ou approbation donné à une idée ou une décision.|Le projet a reçu l’assentiment de toute l’équipe.
+Dissentiment|Désaccord entre personnes ou groupes.|Des dissentiments subsistent sur le calendrier.
+Docte|Qui possède un grand savoir et le montre dans ses propos.|Elle a donné une explication docte, mais très claire.
+Indicible|Qu’on ne peut exprimer avec des mots, souvent tant c’est intense.|J’ai ressenti une joie indicible en apprenant la nouvelle.
+Contre mauvaise fortune bon cœur|Expression invitant à garder courage et bonne humeur face aux difficultés.|Le train est annulé ? Contre mauvaise fortune bon cœur : visitons la ville.
+Laconique|Qui s’exprime en peu de mots.|Sa réponse laconique, « D’accord », ne m’a pas éclairée.
+Pédanterie|Étalage prétentieux de son savoir.|Il corrige chaque détail avec une pédanterie agaçante.
+Acculturé / acculturée|Qui a adopté, en partie ou en totalité, des éléments d’une autre culture.|Au fil du séjour, elle s’est acculturée aux usages locaux.|L’acculturation peut être volontaire ou subie selon le contexte.
+Supplanté / supplantée|Remplacé par quelqu’un ou quelque chose qui prend l’avantage.|Le nouveau logiciel a supplanté l’ancien.
+Congénital / congénitale|Présent dès la naissance.|Cette particularité est congénitale.|« Congénital » ne veut pas nécessairement dire « héréditaire ».
+Impérieux / impérieuse|Qui commande avec autorité ; ou qui s’impose avec force.|Il est impérieux de régler ce problème avant vendredi.
+Deviser|Converser tranquillement, échanger des propos.|Nous avons devisé longtemps autour d’un café.
+Ascétisme|Mode de vie fondé sur la discipline et le renoncement à certains plaisirs.|Il mène sa préparation sportive avec un ascétisme étonnant.
+Véniel / véniels|Qui est peu grave et facilement pardonnable.|Ce retard de deux minutes est une faute vénielle.
+Allusif / allusive|Qui suggère une chose sans la dire directement.|Son message était allusif ; je n’ai pas saisi ce qu’il voulait dire.
+Vacuité|Caractère de ce qui est vide, notamment de sens ou de contenu.|La vacuité de son discours m’a déçue.
+Ignominie|Acte ou parole très honteux, moralement révoltant.|Cette accusation mensongère est une ignominie.
+Opuscule|Petit ouvrage écrit, souvent sur un sujet précis.|J’ai trouvé un opuscule sur l’histoire de Venise.
+Rudoyer|Traiter quelqu’un avec rudesse, dans les mots ou les gestes.|Il ne faut pas rudoyer une personne qui demande de l’aide.
+Fruste|Grossier, rudimentaire ou peu raffiné.|Le mobilier était fruste, mais solide.|« Frustre » est une confusion fréquente avec « fruste » ; « frustré » signifie autre chose.
+Aspérité|Petite irrégularité d’une surface ; difficulté ou rudesse au figuré.|Le parcours comporte quelques aspérités, mais le projet avance.
+Timoré / timorée|Qui manque d’audace, craintif.|Sa réponse timorée n’a pas convaincu le jury.
+Asservir|Soumettre quelqu’un à une domination ou une dépendance.|Le travail ne devrait jamais asservir une personne.
+Péremptoire|Affirmé avec une assurance catégorique, sans laisser de place à la discussion.|Son ton péremptoire a fermé le débat.
+Subversif / subversive|Qui remet en cause l’ordre ou les idées établies.|Cette pièce de théâtre avait un humour subversif.|Interprétation probable de « subervise » ; si tu pensais à un autre mot, modifie cette fiche dans un prochain échange.
+Irrépétible|Qui ne peut être reproduit à l’identique.|Cette rencontre fut un moment irrépétible.
+Subsidiaire|Qui intervient à titre secondaire ou en recours.|Nous envisagerons cette solution à titre subsidiaire.
+Éluder|Éviter habilement une question ou une difficulté.|Il a éludé ma question sur les délais.
+Cathartique|Qui libère de tensions ou d’émotions pénibles.|Écrire ce récit a eu un effet cathartique.
+Aphorisme|Formule brève qui exprime une vérité ou une réflexion générale.|Elle a ouvert son discours par un aphorisme.
+Oaristys|Entretien tendre et amoureux, dialogue intime entre amoureux.|Leur oaristys se prolongea sous les arbres.
+Tendancieux|Qui présente les faits de manière orientée ou partiale.|Ce compte rendu me paraît tendancieux.
+Vicissitude|Changement ou événement difficile dans le cours de la vie.|Elle a surmonté bien des vicissitudes.
+Tropisme|Tendance profonde qui pousse vers quelque chose ; réaction orientée d’un organisme à un stimulus.|Elle a un tropisme marqué pour les langues étrangères.
+Fiduciaire|Relatif à la confiance ou à la monnaie sous forme de billets et pièces.|Les paiements en monnaie fiduciaire diminuent.
+Semondre|Inviter, convier ou exhorter ; verbe littéraire et vieilli.|Je vous semonds de venir nous rejoindre.
+Concaténation|Enchaînement d’éléments liés les uns aux autres.|Une concaténation de circonstances a retardé le projet.
+Captieux|Qui cherche à tromper par un raisonnement ou une question fallacieuse.|Cette question captieuse visait à le piéger.
+Ataraxie|État de tranquillité de l’âme, sans trouble ni agitation.|La méditation l’aide à rechercher l’ataraxie.`;
+const base=raw.split('\n').map((line,i)=>{const [word,def,example,note='']=line.split('|');return {id:'b'+i,word,def,example,note}});
+const KEY='monica-carnet-mots-v1';let state;try{state=JSON.parse(localStorage.getItem(KEY))||{custom:[],favs:[]}}catch{state={custom:[],favs:[]}};
+if(!Array.isArray(state.custom))state.custom=[];if(!Array.isArray(state.favs))state.favs=[];
+const $=s=>document.querySelector(s), all=()=>[...base,...state.custom],save=()=>{try{localStorage.setItem(KEY,JSON.stringify(state))}catch{$('#toast').textContent='Stockage indisponible : exporte une copie de tes mots.'}},esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let favoritesOnly=false,descending=false,study=[],studyIndex=0,revealed=false,question=null,answered=false,score=0,total=0;
+function showTab(id){document.querySelectorAll('.panel').forEach(p=>p.hidden=p.id!==id);document.querySelectorAll('[data-tab]').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.tab===id)));if(id==='words')renderWords();if(id==='quiz'&&!question)newQuiz()}
+document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>showTab(b.dataset.tab));
+function updateCount(){$('#count').textContent=`${all().length} mots et expressions à explorer · ${state.custom.length} ajouté${state.custom.length>1?'s':''} par toi`}
+function renderWords(){const q=$('#search').value.toLocaleLowerCase('fr').trim();let list=all().filter(x=>(!favoritesOnly||state.favs.includes(x.id))&&(`${x.word} ${x.def} ${x.example}`).toLocaleLowerCase('fr').includes(q));list.sort((a,b)=>a.word.localeCompare(b.word,'fr')*(descending?-1:1));$('#results').textContent=`${list.length} résultat${list.length>1?'s':''}`;$('#entries').innerHTML=list.map(x=>`<article class="entry"><span class="tag">${x.id.startsWith('b')?'Dans la liste initiale':'Ajouté par moi'}</span><h3>${esc(x.word)}</h3><p>${esc(x.def)}</p><p class="example">« ${esc(x.example)} »</p>${x.note?`<p class="muted">↳ ${esc(x.note)}</p>`:''}<div class="actions"><button data-fav="${esc(x.id)}" aria-label="${state.favs.includes(x.id)?'Retirer des favoris':'Ajouter aux favoris'} : ${esc(x.word)}">${state.favs.includes(x.id)?'★ Favori':'☆ À retenir'}</button>${x.id.startsWith('c')?`<button data-delete="${esc(x.id)}" aria-label="Supprimer ${esc(x.word)}">Supprimer</button>`:''}</div></article>`).join('')||'<p>Aucun mot trouvé.</p>'}
+$('#entries').onclick=e=>{let b=e.target.closest('button');if(!b)return;if(b.dataset.fav){state.favs=state.favs.includes(b.dataset.fav)?state.favs.filter(id=>id!==b.dataset.fav):[...state.favs,b.dataset.fav];save();renderWords()}if(b.dataset.delete&&confirm('Supprimer ce mot ajouté ?')){state.custom=state.custom.filter(x=>x.id!==b.dataset.delete);state.favs=state.favs.filter(id=>id!==b.dataset.delete);save();updateCount();renderWords()}};
+$('#search').oninput=renderWords;$('#only-fav').onclick=()=>{favoritesOnly=!favoritesOnly;$('#only-fav').setAttribute('aria-pressed',String(favoritesOnly));$('#only-fav').textContent=favoritesOnly?'★ Mes favoris':'☆ Mes favoris';renderWords()};$('#sort').onclick=()=>{descending=!descending;$('#sort').textContent=descending?'Z → A':'A → Z';renderWords()};
+function shuffle(a,seed){let out=[...a];for(let i=out.length-1;i>0;i--){seed=(seed*1664525+1013904223)>>>0;let j=seed%(i+1);[out[i],out[j]]=[out[j],out[i]]}return out}
+function resetStudy(random=false){const day=Math.floor(Date.now()/86400000);study=shuffle(all(),random?Math.floor(Math.random()*4294967295):day).slice(0,5);studyIndex=0;revealed=false;renderStudy()}
+function renderStudy(){const x=study[studyIndex];if(!x)return;$('#study-progress').textContent=`Carte ${studyIndex+1} / ${study.length}`;$('#flip').innerHTML=`${esc(x.word)}<small>${revealed?'Masquer le sens ↑':'Appuie pour révéler le sens ↓'}</small>`;$('#flip').setAttribute('aria-label',revealed?'Masquer la définition':'Révéler la définition');$('#study-answer').innerHTML=revealed?`<strong>${esc(x.def)}</strong><br>« ${esc(x.example)} »${x.note?`<br><span class="muted">${esc(x.note)}</span>`:''}`:'';$('#prev').disabled=studyIndex===0;$('#next').disabled=studyIndex===study.length-1}
+$('#flip').onclick=()=>{revealed=!revealed;renderStudy()};$('#prev').onclick=()=>{studyIndex--;revealed=false;renderStudy()};$('#next').onclick=()=>{studyIndex++;revealed=false;renderStudy()};$('#random').onclick=()=>resetStudy(true);
+function newQuiz(){let a=all();if(a.length<4)return;question=a[Math.floor(Math.random()*a.length)];let others=shuffle(a.filter(x=>x.id!==question.id),Math.floor(Math.random()*4294967295)).slice(0,3);let choices=shuffle([question,...others],Math.floor(Math.random()*4294967295));answered=false;$('#quiz-word').textContent=question.word;$('#quiz-choices').innerHTML=choices.map(x=>`<button class="quiz-option" data-answer="${esc(x.id)}">${esc(x.def)}</button>`).join('');$('#quiz-feedback').textContent='';$('#quiz-next').hidden=true;$('#score').textContent=`${score} bonne${score>1?'s':''} réponse${score>1?'s':''} sur ${total}`}
+$('#quiz-choices').onclick=e=>{let b=e.target.closest('[data-answer]');if(!b||answered)return;answered=true;total++;let ok=b.dataset.answer===question.id;if(ok)score++;document.querySelectorAll('[data-answer]').forEach(el=>{el.disabled=true;if(el.dataset.answer===question.id)el.classList.add('correct');else if(el===b)el.classList.add('wrong')});$('#quiz-feedback').textContent=ok?'Bravo ! '+question.example:'À retenir : '+question.example;$('#score').textContent=`${score} bonne${score>1?'s':''} réponse${score>1?'s':''} sur ${total}`;$('#quiz-next').hidden=false};$('#quiz-next').onclick=newQuiz;
+$('#add-form').onsubmit=e=>{e.preventDefault();let word=$('#new-word').value.trim(),def=$('#new-definition').value.trim(),example=$('#new-example').value.trim();if(!word||!def||!example)return;if(all().some(x=>x.word.toLocaleLowerCase('fr')===word.toLocaleLowerCase('fr'))){$('#toast').textContent='Ce mot est déjà dans le carnet. Cherche-le dans « Tous les mots ».';return}state.custom.push({id:'c'+Date.now()+Math.random().toString(36).slice(2),word,def,example,note:''});save();updateCount();e.target.reset();$('#toast').textContent=`« ${word} » a été ajouté !`;resetStudy();showTab('words');$('#search').value=word;renderWords()};
+$('#export').onclick=()=>{let blob=new Blob([JSON.stringify({format:'mon-carnet-des-mots',version:1,custom:state.custom,favs:state.favs},null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='mes-mots-sauvegarde.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),30000);$('#toast').textContent='Sauvegarde téléchargée.'};
+$('#import').onchange=async e=>{try{let file=e.target.files[0];if(!file)return;if(file.size>2e6)throw Error('Fichier trop volumineux.');let d=JSON.parse(await file.text());if(d.format!=='mon-carnet-des-mots'||!Array.isArray(d.custom)||!Array.isArray(d.favs))throw Error('Ce fichier n’est pas une sauvegarde du carnet.');let valid=d.custom.filter(x=>x&&typeof x.id==='string'&&typeof x.word==='string'&&typeof x.def==='string'&&typeof x.example==='string'&&x.word.length<=80&&x.def.length<=240&&x.example.length<=400).slice(0,5000);let existing=new Set(all().map(x=>x.word.toLocaleLowerCase('fr'))),added=0;for(let x of valid){if(!existing.has(x.word.toLocaleLowerCase('fr'))){state.custom.push({id:'c'+Date.now()+Math.random().toString(36).slice(2),word:x.word,def:x.def,example:x.example,note:''});existing.add(x.word.toLocaleLowerCase('fr'));added++}}state.favs=[...new Set([...state.favs,...d.favs.filter(id=>typeof id==='string'&&all().some(x=>x.id===id))])];save();updateCount();resetStudy();$('#toast').textContent=`Import terminé : ${added} nouveau${added>1?'x':''} mot${added>1?'s':''}.`}catch(err){$('#toast').textContent=err.message||'Impossible de lire ce fichier.'}e.target.value=''};
+updateCount();resetStudy();
+</script><script>
+/* Synchronisation REST Supabase : aucune clé secrète dans ce fichier. */
+(()=>{
+const URL='https://oqhakwvlubeiippqcwpk.supabase.co';
+const KEY='sb_publishable_1HIpdwore5Qv3HyURvkM8w_QaSg74C_';
+const SKEY='carnet-supabase-session-v1';
+const el=id=>document.getElementById(id);
+let session=null;
+try{session=JSON.parse(localStorage.getItem(SKEY)||'null')}catch{}
+const status=t=>el('sync-status').textContent=t;
+function ui(){const connected=!!(session&&session.access_token&&session.user);el('sync-login').hidden=connected;el('sync-logged').hidden=!connected;if(connected)status('Connectée : '+session.user.email+' · Synchronisation activée');else status('Connecte-toi pour synchroniser tes mots entre tes appareils.');}
+async function req(path,opts={},auth=false){
+ const headers={'apikey':KEY,'Content-Type':'application/json',...(opts.headers||{})};
+ if(auth){if(!session?.access_token)throw Error('Connecte-toi d’abord.');headers.Authorization='Bearer '+session.access_token;}
+ const res=await fetch(URL+path,{...opts,headers});const body=await res.text();let data;try{data=body?JSON.parse(body):null}catch{data=body}
+ if(!res.ok)throw Error(data?.msg||data?.error_description||data?.message||'Erreur HTTP '+res.status);
+ return data;
+}
+function storeSession(data){session=data;localStorage.setItem(SKEY,JSON.stringify(session));ui()}
+async function renew(){if(!session?.refresh_token)return false;try{let d=await req('/auth/v1/token?grant_type=refresh_token',{method:'POST',body:JSON.stringify({refresh_token:session.refresh_token})});storeSession(d);return true}catch{session=null;localStorage.removeItem(SKEY);ui();return false}}
+async function authorized(path,opts){try{return await req(path,opts,true)}catch(e){if((/401|JWT|expired/i).test(e.message)&&await renew())return req(path,opts,true);throw e}}
+function fromRemote(r){return {id:'c'+r.id,word:r.mot,def:r.definition,example:r.exemple||'',note:''}}
+async function sync(){if(!session?.user)return;status('Synchronisation en cours…');try{
+ const rows=await authorized('/rest/v1/mots?select=id,mot,definition,exemple&order=cree_le.asc&limit=10000');
+ const known=new Set(rows.map(r=>r.mot.trim().toLocaleLowerCase('fr')));
+ // Importer une fois les mots locaux préexistants sans les effacer.
+ for(const x of state.custom){if(!known.has(x.word.trim().toLocaleLowerCase('fr'))){const inserted=await authorized('/rest/v1/mots',{method:'POST',headers:{Prefer:'return=representation'},body:JSON.stringify({utilisateur_id:session.user.id,mot:x.word,definition:x.def,exemple:x.example})});if(inserted?.[0]){rows.push(inserted[0]);known.add(x.word.trim().toLocaleLowerCase('fr'))}}}
+ state.custom=rows.map(fromRemote);save();updateCount();renderWords();resetStudy();status('✓ Carnet synchronisé · '+state.custom.length+' mots personnels dans le cloud');
+ }catch(e){status('Synchronisation impossible : '+e.message+' · Vérifie ta connexion et conserve une sauvegarde.')}}
+el('sync-signup').onclick=async()=>{const email=el('sync-email').value.trim(),password=el('sync-password').value;if(!email||password.length<6){status('Saisis ton e-mail et un mot de passe de 6 caractères minimum.');return}status('Création du compte…');try{await req('/auth/v1/signup',{method:'POST',body:JSON.stringify({email,password})});status('Compte demandé. Consulte ta boîte e-mail pour confirmer ton adresse, puis connecte-toi.')}catch(e){status('Erreur : '+e.message)}};
+el('sync-signin').onclick=async()=>{const email=el('sync-email').value.trim(),password=el('sync-password').value;status('Connexion…');try{const d=await req('/auth/v1/token?grant_type=password',{method:'POST',body:JSON.stringify({email,password})});storeSession(d);await sync()}catch(e){status('Connexion impossible : '+e.message)}};
+el('sync-refresh').onclick=sync;
+el('sync-logout').onclick=async()=>{try{await authorized('/auth/v1/logout',{method:'POST'})}catch{}session=null;localStorage.removeItem(SKEY);state.custom=[];save();updateCount();renderWords();resetStudy();ui()};
+// Remplacer uniquement les opérations de création/suppression par leur version synchronisée.
+el('add-form').onsubmit=async e=>{e.preventDefault();if(!session?.user){status('Connecte-toi avant d’ajouter un mot.');return}const word=el('new-word').value.trim(),def=el('new-definition').value.trim(),example=el('new-example').value.trim();if(!word||!def||!example)return;if(all().some(x=>x.word.toLocaleLowerCase('fr')===word.toLocaleLowerCase('fr'))){el('toast').textContent='Ce mot est déjà dans le carnet.';return}try{await authorized('/rest/v1/mots',{method:'POST',body:JSON.stringify({utilisateur_id:session.user.id,mot:word,definition:def,exemple:example})});e.target.reset();await sync();showTab('words');el('search').value=word;renderWords();el('toast').textContent='« '+word+' » est enregistré dans le cloud.'}catch(err){el('toast').textContent='Ajout non enregistré : '+err.message}};
+const entries=el('entries');entries.onclick=async e=>{let b=e.target.closest('button');if(!b)return;if(b.dataset.fav){state.favs=state.favs.includes(b.dataset.fav)?state.favs.filter(id=>id!==b.dataset.fav):[...state.favs,b.dataset.fav];save();renderWords();return}if(b.dataset.delete&&confirm('Supprimer ce mot sur tous tes appareils ?')){if(!session?.user){status('Connecte-toi avant de supprimer un mot.');return}try{await authorized('/rest/v1/mots?id=eq.'+encodeURIComponent(b.dataset.delete.slice(1)),{method:'DELETE'});await sync()}catch(err){status('Suppression impossible : '+err.message)}}};
+// L’import local reste possible ; le bouton de synchronisation l’enverra ensuite dans le cloud.
+const oldImport=el('import').onchange;el('import').onchange=async e=>{await oldImport(e);if(session?.user)await sync()};
+ui();if(session?.access_token){(async()=>{if(session.expires_at&&session.expires_at<Date.now()/1000+120)await renew();await sync()})()}
+})();
+</script></body></html>
